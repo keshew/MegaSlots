@@ -3,6 +3,7 @@ import SwiftUI
 struct GoldSlotsView: View {
     @StateObject var fruitSlotsModel =  GoldSlotsViewModel()
     @State var showAlert = false
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         ZStack {
@@ -16,18 +17,18 @@ struct GoldSlotsView: View {
                 .opacity(0.5)
             }
             .ignoresSafeArea()
-            .aspectRatio(contentMode: .fill)
             
             ScrollView(showsIndicators: false) {
                 VStack {
                     Image(.holderGold)
                         .resizable()
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 180 : 110)
                         .overlay {
                             VStack {
                                 HStack {
                                     Button(action: {
-                                        
+                                        NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                        presentationMode.wrappedValue.dismiss()
                                     }) {
                                         Image(.backGoldSlots)
                                             .resizable()
@@ -50,7 +51,7 @@ struct GoldSlotsView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 40 : 20)
                                 
                                 HStack {
                                     Image(.goldSlots1)
@@ -69,7 +70,7 @@ struct GoldSlotsView: View {
                     
                     Rectangle()
                         .fill(Color(red: 225/255, green: 160/255, blue: 18/255).opacity(0.1))
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 269)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 480 : 269)
                         .overlay {
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(Color(red: 225/255, green: 160/255, blue: 18/255), lineWidth: 5)
@@ -184,6 +185,9 @@ struct GoldSlotsView: View {
                             if fruitSlotsModel.balance != 0 {
                                 fruitSlotsModel.spin()
                                 fruitSlotsModel.balance -= fruitSlotsModel.bet
+                                UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
+                                UserDefaultsManager.shared.incrementGoldSlotSpins()
+                                UserDefaultsManager.shared.incrementSpinsCount()
                             } else {
                                 showAlert = true
                             }

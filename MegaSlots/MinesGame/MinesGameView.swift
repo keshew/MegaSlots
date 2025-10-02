@@ -3,8 +3,12 @@ import SwiftUI
 struct MinesGameView: View {
     @StateObject var fruitSlotsModel =  MinesGameViewModel()
     @State var showAlert = false
-    @State private var isPlaying: Bool = false
+    @State private var isPlaying = false
+    @State private var multiplier: CGFloat = 1.0
+    @State private var bombCount = 3
+    @State private var timer: Timer? = nil
     let grid5 = Array(repeating: GridItem(.flexible(), spacing: 0), count: 5)
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         ZStack {
@@ -18,18 +22,18 @@ struct MinesGameView: View {
                 .opacity(0.5)
             }
             .ignoresSafeArea()
-            .aspectRatio(contentMode: .fill)
             
             ScrollView(showsIndicators: false) {
                 VStack {
                     Image(.holder5)
                         .resizable()
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 180 : 110)
                         .overlay {
                             VStack {
                                 HStack {
                                     Button(action: {
-                                        
+                                        NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                        presentationMode.wrappedValue.dismiss()
                                     }) {
                                         Image(.minesBack)
                                             .resizable()
@@ -52,7 +56,7 @@ struct MinesGameView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 40 : 20)
                                 
                                 HStack {
                                     Image(.dimond)
@@ -82,15 +86,25 @@ struct MinesGameView: View {
                                             .stroke(Color(red: 4/255, green: 144/255, blue: 224/255), lineWidth: 5)
                                             .overlay {
                                                 LazyVGrid(columns: grid5, spacing: 10) {
-                                                    ForEach(0..<25, id: \.self) { _ in
+                                                    ForEach(fruitSlotsModel.cells) { cell in
                                                         Rectangle()
-                                                            .fill(.gray)
+                                                            .fill(cellColor(for: cell))
                                                             .frame(width: 45, height: 45)
                                                             .overlay {
+                                                                if cell.isOpened {
+                                                                    Image(cell.type == .bomb ? "bomb" : "dimond")
+                                                                        .resizable()
+                                                                        .frame(width: cell.type == .bomb ? 27 : 31, height: cell.type == .bomb ? 38 : 28)
+                                                                }
                                                                 RoundedRectangle(cornerRadius: 8)
-                                                                    .stroke(.white, lineWidth: 3)
+                                                                    .stroke(Color.white, lineWidth: 3)
                                                             }
                                                             .cornerRadius(8)
+                                                            .onTapGesture {
+                                                                if isPlaying && !cell.isOpened {
+                                                                    openCell(cell)
+                                                                }
+                                                            }
                                                     }
                                                 }
                                                 .padding(10)
@@ -99,7 +113,7 @@ struct MinesGameView: View {
                                     .frame(width: 316, height: 318)
                                     .cornerRadius(14)
                             }
-                            .frame(width: UIScreen.main.bounds.size.width - 30,  height: 389)
+                            .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 480 : 389)
                             .padding(.top, 15)
                         
                         Rectangle()
@@ -110,8 +124,8 @@ struct MinesGameView: View {
                                     .stroke(Color(red: 10/255, green: 126/255, blue: 190/255), lineWidth: 3)
                                     .overlay {
                                         HStack {
-                                            Text("X 1.23")
-                                                .FontBold(size: 15, color: .green)
+                                            Text("X \(String(format: "%.2f", multiplier))")
+                                                .FontBold(size: 23, color: fruitSlotsModel.multiplierTextColor)
                                                 .outlineText(color: .white, width: 0.5)
                                         }
                                     }
@@ -193,7 +207,7 @@ struct MinesGameView: View {
                                         
                                         HStack {
                                             Button(action: {
-                                                fruitSlotsModel.bet = fruitSlotsModel.balance / 2
+                                                setBombsCount(3)
                                             }) {
                                                 Rectangle()
                                                     .fill(LinearGradient(colors: [Color(red: 1/255, green: 138/255, blue: 207/255),
@@ -213,7 +227,7 @@ struct MinesGameView: View {
                                             }
                                             
                                             Button(action: {
-                                                fruitSlotsModel.bet = fruitSlotsModel.balance / 4
+                                                setBombsCount(4)
                                             }) {
                                                 Rectangle()
                                                     .fill(LinearGradient(colors: [Color(red: 1/255, green: 138/255, blue: 207/255),
@@ -233,7 +247,7 @@ struct MinesGameView: View {
                                             }
                                             
                                             Button(action: {
-                                                fruitSlotsModel.bet = fruitSlotsModel.balance / 8
+                                                setBombsCount(5)
                                             }) {
                                                 Rectangle()
                                                     .fill(LinearGradient(colors: [Color(red: 1/255, green: 138/255, blue: 207/255),
@@ -253,7 +267,7 @@ struct MinesGameView: View {
                                             }
                                             
                                             Button(action: {
-                                                fruitSlotsModel.bet = fruitSlotsModel.balance / 16
+                                                setBombsCount(6)
                                             }) {
                                                 Rectangle()
                                                     .fill(LinearGradient(colors: [Color(red: 1/255, green: 138/255, blue: 207/255),
@@ -274,7 +288,12 @@ struct MinesGameView: View {
                                         }
                                         
                                         Button(action: {
-                                      
+                                            if isPlaying {
+                                                claimReward()
+                                            } else {
+                                                startGame()
+                                                UserDefaultsManager.shared.incrementSpinsCount()
+                                            }
                                         }) {
                                             Rectangle()
                                                 .fill(LinearGradient(colors: [Color(red: 1/255, green: 138/255, blue: 207/255),
@@ -307,6 +326,94 @@ struct MinesGameView: View {
                         .cornerRadius(14)
                 }
             }
+        }
+        .onAppear {
+            initializeCells()
+        }
+    }
+    
+    func initializeCells() {
+        var initialCells = [CellState]()
+        for _ in 0..<25 {
+            initialCells.append(CellState(type: .diamond, isOpened: false))
+        }
+        fruitSlotsModel.cells = initialCells
+    }
+
+    func startGame() {
+        isPlaying = true
+        multiplier = 1.0
+        fruitSlotsModel.multiplierTextColor = Color(red: 0/255, green: 167/255, blue: 196/255)
+        fruitSlotsModel.balance -= fruitSlotsModel.bet
+        UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
+        var newCells = (0..<25).map { _ in CellState(type: .diamond) }
+
+
+        var bombsPlaced = 0
+        while bombsPlaced < bombCount {
+            let index = Int.random(in: 0..<25)
+            if newCells[index].type != .bomb {
+                newCells[index].type = .bomb
+                bombsPlaced += 1
+            }
+        }
+
+        DispatchQueue.main.async {
+            self.fruitSlotsModel.cells = newCells
+        }
+    }
+
+    
+    func openCell(_ cell: CellState) {
+        guard let idx = fruitSlotsModel.cells.firstIndex(where: { $0.id == cell.id }) else { return }
+        fruitSlotsModel.cells[idx].isOpened = true
+
+        if fruitSlotsModel.cells[idx].type == .bomb {
+            fruitSlotsModel.multiplierTextColor = .red
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                endGame(lost: true)
+                initializeCells()
+            }
+        } else {
+            multiplier += 0.2
+            fruitSlotsModel.multiplierTextColor = Color(red: 0/255, green: 167/255, blue: 196/255)
+
+            if fruitSlotsModel.cells.filter({ $0.type == .diamond && !$0.isOpened }).isEmpty {
+                endGame(lost: false)
+            }
+        }
+    }
+    
+    func claimReward() {
+        let winAmount = Int(fruitSlotsModel.bet) * Int(multiplier * 100) / 100
+        endGame(lost: false)
+        initializeCells()
+        UserDefaultsManager.shared.addCoins(winAmount)
+        UserDefaultsManager.shared.addWinnings(winAmount)
+    }
+    
+    func endGame(lost: Bool) {
+        isPlaying = false
+        if lost {
+            
+        } else {
+            let winAmount = Int(fruitSlotsModel.bet) * Int(multiplier * 100) / 100
+            fruitSlotsModel.balance += winAmount
+        }
+    }
+
+    
+    func setBombsCount(_ count: Int) {
+        bombCount = count
+    }
+    
+    func cellColor(for cell: CellState) -> Color {
+        if !cell.isOpened {
+            return Color.gray
+        } else if cell.type == .bomb {
+            return Color.red
+        } else {
+            return Color.green
         }
     }
 }

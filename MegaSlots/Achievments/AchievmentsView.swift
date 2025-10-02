@@ -13,12 +13,14 @@ struct AchivModel: Codable, Identifiable {
 
 struct AchievmentsView: View {
     @StateObject var achievmentsModel =  AchievmentsViewModel()
-    @State var achiv = [AchivModel(title: "First Spin", desc: "Play your first slot game", image: "achiv1", reward: 50, isDone: true),
-                        AchivModel(title: "Slot Explorer", desc: "Try all 4 slot machines", image: "achiv2", reward: 200),
-                        AchivModel(title: "High Roller", desc: "Win 10,000 coins in total", image: "achiv3", reward: 500),
-                        AchivModel(title: "Lucky Streak", desc: "Win 1,000 coins in a single spin", image: "achiv4", reward: 1000),
-                        AchivModel(title: "Dedicated Player", desc: "Play 100 games", image: "achiv5", reward: 300),
-                        AchivModel(title: "Spin Master", desc: "Make 500 spins", image: "achiv6", reward: 750)]
+    
+    @Environment(\.presentationMode) var presentationMode
+    @State var achiv = [AchivModel(title: "First Spin", desc: "Play your first slot game", image: "achiv1", reward: 50, currentProgress: UserDefaultsManager.shared.getSpinsCount(), goalProgress: 1),
+                        AchivModel(title: "Slot Explorer", desc: "Try all 4 slot machines", image: "achiv2", reward: 200, currentProgress: UserDefaultsManager.shared.getSpinsCount(), goalProgress: 4),
+                        AchivModel(title: "High Roller", desc: "Win 10,000 coins in total", image: "achiv3", reward: 500, currentProgress: UserDefaultsManager.shared.getTotalWinnings(), goalProgress: 10000),
+                        AchivModel(title: "Lucky Streak", desc: "Win 1,000 coins in a single spin", image: "achiv4", reward: 1000, currentProgress: UserDefaultsManager.shared.getTotalWinnings(), goalProgress: 1000),
+                        AchivModel(title: "Dedicated Player", desc: "Play 100 games", image: "achiv5", reward: 300, currentProgress: UserDefaultsManager.shared.getSpinsCount(), goalProgress: 100),
+                        AchivModel(title: "Spin Master", desc: "Make 500 spins", image: "achiv6", reward: 750, currentProgress: UserDefaultsManager.shared.getSpinsCount(), goalProgress: 500)]
     
     var unlockedAchiv: [AchivModel] {
          achiv.filter { $0.isDone }
@@ -28,6 +30,17 @@ struct AchievmentsView: View {
          achiv.filter { !$0.isDone }
      }
     
+    var totalCoinsEarned: Int {
+        achiv.filter { $0.isDone }.reduce(0) { $0 + $1.reward }
+    }
+    
+    var completionPercent: Int {
+        let total = achiv.count
+        guard total > 0 else { return 0 }
+        let completed = achiv.filter { $0.isDone }.count
+        return Int((Double(completed) / Double(total)) * 100)
+    }
+
     var body: some View {
         ZStack {
             Image(.bgMain)
@@ -44,7 +57,8 @@ struct AchievmentsView: View {
                                 VStack {
                                     HStack {
                                         Button(action: {
-                                            
+                                            NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                            presentationMode.wrappedValue.dismiss()
                                         }) {
                                             Image(.back)
                                                 .resizable()
@@ -59,7 +73,7 @@ struct AchievmentsView: View {
                                                 .frame(width: 40, height: 40)
                                             
                                             HStack(spacing: 5) {
-                                                Text("1020")
+                                                Text("\(achievmentsModel.coins)")
                                                     .FontSemiBold(size: 20, color: Color(red: 253/255, green: 199/255, blue: 2/255))
                                                 
                                                 Text("coins")
@@ -98,7 +112,7 @@ struct AchievmentsView: View {
                                         VStack {
                                             HStack(spacing: 15) {
                                                 VStack {
-                                                    Text("0")
+                                                    Text("\(unlockedAchiv.count)")
                                                         .FontBold(size: 24, color: Color(red: 253/255, green: 199/255, blue: 2/255))
                                                     
                                                     Text("Unlocked")
@@ -106,7 +120,7 @@ struct AchievmentsView: View {
                                                 }
                                                 
                                                 VStack {
-                                                    Text("1")
+                                                    Text("\(achiv.count)")
                                                         .FontBold(size: 24)
                                                     
                                                     Text("Total")
@@ -114,7 +128,7 @@ struct AchievmentsView: View {
                                                 }
                                                 
                                                 VStack {
-                                                    Text("50")
+                                                    Text("\(totalCoinsEarned)")
                                                         .FontBold(size: 24, color: Color(red: 4/255, green: 223/255, blue: 114/255))
                                                     
                                                     Text("Coins Earned")
@@ -125,20 +139,22 @@ struct AchievmentsView: View {
                                             VStack(spacing: 10) {
                                                 ZStack(alignment: .leading) {
                                                     Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 12)
+                                                        .fill(Color.white.opacity(0.2))
+                                                        .frame(width: 300, height: 12)
                                                         .cornerRadius(10)
                                                     
                                                     Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 12)
+                                                        .fill(LinearGradient(colors: [
+                                                            Color(red: 253/255, green: 199/255, blue: 2/255),
+                                                            Color(red: 255/255, green: 137/255, blue: 6/255)
+                                                        ], startPoint: .leading, endPoint: .trailing))
+                                                        .frame(width: CGFloat(completionPercent) * 3, height: 12)
                                                         .cornerRadius(10)
                                                 }
                                                 .padding(.horizontal, 30)
                                                 .padding(.top, 5)
                                                 
-                                                Text("17% Complete")
+                                                Text("\(completionPercent)% Complete")
                                                     .FontRegular(size: 14, color: .white.opacity(0.6))
                                             }
                                             .padding(.top, 10)
@@ -282,26 +298,34 @@ struct AchievmentsView: View {
                                                                 .FontRegular(size: 14, color: .white.opacity(0.8))
                                                             
                                                             VStack(spacing: 7) {
+                                                                let progressFraction = min(CGFloat(item.currentProgress) / CGFloat(item.goalProgress), 1.0)
+                                                                let percent = Int(progressFraction * 100)
+                                                                
                                                                 HStack {
                                                                     Text("Progress: 0/4")
                                                                         .FontRegular(size: 12, color: .white.opacity(0.6))
                                                                     
                                                                     Spacer()
                                                                     
-                                                                    Text("0%")
+                                                                    Text("\(percent)%")
                                                                         .FontRegular(size: 12, color: .white.opacity(0.6))
                                                                 }
                                                                 
                                                                 ZStack(alignment: .leading) {
                                                                     Rectangle()
                                                                         .fill(.white.opacity(0.2))
-                                                                        .frame(height: 8)
+                                                                        .frame(width: 240, height: 8)
                                                                         .cornerRadius(10)
                                                                     
+                                                                    let progressFraction = min(CGFloat(item.currentProgress) / CGFloat(item.goalProgress), 1.0)
+                                                                    let progressWidth = progressFraction * 240
+
                                                                     Rectangle()
-                                                                        .fill(LinearGradient(colors: [Color(red: 81/255, green: 162/255, blue: 255/255),
-                                                                                                      Color(red: 194/255, green: 122/255, blue: 255/255)], startPoint: .leading, endPoint: .trailing))
-                                                                        .frame(width: 100, height: 8)
+                                                                        .fill(LinearGradient(colors: [
+                                                                            Color(red: 81/255, green: 162/255, blue: 255/255),
+                                                                            Color(red: 194/255, green: 122/255, blue: 255/255)
+                                                                        ], startPoint: .leading, endPoint: .trailing))
+                                                                        .frame(width: progressWidth, height: 8)
                                                                         .cornerRadius(10)
                                                                 }
                                                             }
@@ -331,6 +355,18 @@ struct AchievmentsView: View {
                 }
             }
         }
+        .onAppear {
+            for i in achiv.indices {
+                updateAchievementProgress(&achiv[i])
+            }
+        }
+    }
+    
+    func updateAchievementProgress(_ achiv: inout AchivModel) {
+        if achiv.currentProgress >= achiv.goalProgress && !achiv.isDone {
+            achiv.isDone = true
+//            achievmentsModel.rewardCoins(achiv.reward) 
+        }
     }
 }
 
@@ -338,3 +374,111 @@ struct AchievmentsView: View {
     AchievmentsView()
 }
 
+import Foundation
+
+class UserDefaultsManager {
+    static let shared = UserDefaultsManager()
+    
+    private let coinsKey = "coinsKey"
+    private let spinsKey = "spinsKey"
+    private let winningsKey = "winningsKey"
+    
+    private let fruitSlotKey = "fruitSlotSpinsKey"
+    private let spaceSlotKey = "spaceSlotSpinsKey"
+    private let megaSlotKey = "megaSlotSpinsKey"
+    private let goldSlotKey = "goldSlotSpinsKey"
+    
+    private let defaults = UserDefaults.standard
+    
+    func getCoins() -> Int {
+        return defaults.integer(forKey: coinsKey)
+    }
+    
+    func setCoins(_ amount: Int) {
+        defaults.set(amount, forKey: coinsKey)
+    }
+    
+    func addCoins(_ amount: Int) {
+        let current = getCoins()
+        setCoins(current + amount)
+    }
+    
+    func subtractCoins(_ amount: Int) {
+        let current = getCoins()
+        setCoins(max(current - amount, 0))
+    }
+    
+    func getSpinsCount() -> Int {
+        return defaults.integer(forKey: spinsKey)
+    }
+    
+    func incrementSpinsCount() {
+        let current = getSpinsCount()
+        defaults.set(current + 1, forKey: spinsKey)
+    }
+    
+    func getTotalWinnings() -> Int {
+        return defaults.integer(forKey: winningsKey)
+    }
+    
+    func addWinnings(_ amount: Int) {
+        let current = getTotalWinnings()
+        defaults.set(current + amount, forKey: winningsKey)
+    }
+    
+    // MARK: - Fruit Slot
+    
+    func getFruitSlotSpins() -> Int {
+        return defaults.integer(forKey: fruitSlotKey)
+    }
+    
+    func incrementFruitSlotSpins() {
+        let current = getFruitSlotSpins()
+        defaults.set(current + 1, forKey: fruitSlotKey)
+    }
+    
+    // MARK: - Space Slot
+    
+    func getSpaceSlotSpins() -> Int {
+        return defaults.integer(forKey: spaceSlotKey)
+    }
+    
+    func incrementSpaceSlotSpins() {
+        let current = getSpaceSlotSpins()
+        defaults.set(current + 1, forKey: spaceSlotKey)
+    }
+    
+    // MARK: - Mega Slot
+    
+    func getMegaSlotSpins() -> Int {
+        return defaults.integer(forKey: megaSlotKey)
+    }
+    
+    func incrementMegaSlotSpins() {
+        let current = getMegaSlotSpins()
+        defaults.set(current + 1, forKey: megaSlotKey)
+    }
+    
+    // MARK: - Gold Slot
+    
+    func getGoldSlotSpins() -> Int {
+        return defaults.integer(forKey: goldSlotKey)
+    }
+    
+    func incrementGoldSlotSpins() {
+        let current = getGoldSlotSpins()
+        defaults.set(current + 1, forKey: goldSlotKey)
+    }
+    
+    func resetAllButCoins() {
+        defaults.removeObject(forKey: spinsKey)
+        defaults.removeObject(forKey: winningsKey)
+        
+        defaults.removeObject(forKey: fruitSlotKey)
+        defaults.removeObject(forKey: spaceSlotKey)
+        defaults.removeObject(forKey: megaSlotKey)
+        defaults.removeObject(forKey: goldSlotKey)
+        
+        setCoins(1000)
+    }
+}

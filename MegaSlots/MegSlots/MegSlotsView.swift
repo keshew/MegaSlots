@@ -3,6 +3,7 @@ import SwiftUI
 struct MegSlotsView: View {
     @StateObject var fruitSlotsModel =  MegSlotsViewModel()
     @State var showAlert = false
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         ZStack {
@@ -16,18 +17,18 @@ struct MegSlotsView: View {
                 .opacity(0.5)
             }
             .ignoresSafeArea()
-            .aspectRatio(contentMode: .fill)
             
             ScrollView(showsIndicators: false) {
                 VStack {
                     Image(.holder5)
                         .resizable()
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 180 : 110)
                         .overlay {
                             VStack {
                                 HStack {
                                     Button(action: {
-                                        
+                                        NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                        presentationMode.wrappedValue.dismiss()
                                     }) {
                                         Image(.megaSlotsBack)
                                             .resizable()
@@ -50,7 +51,7 @@ struct MegSlotsView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 40 : 20)
                                 
                                 HStack {
                                     Image(.megaSlot6)
@@ -69,7 +70,7 @@ struct MegSlotsView: View {
                     
                     Rectangle()
                         .fill(Color(red: 114/255, green: 115/255, blue: 179/255).opacity(0.4))
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 269)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 480 : 269)
                         .overlay {
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(Color(red: 114/255, green: 115/255, blue: 179/255), lineWidth: 5)
@@ -184,6 +185,9 @@ struct MegSlotsView: View {
                             if fruitSlotsModel.balance != 0 {
                                 fruitSlotsModel.spin()
                                 fruitSlotsModel.balance -= fruitSlotsModel.bet
+                                UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
+                                UserDefaultsManager.shared.incrementMegaSlotSpins()
+                                UserDefaultsManager.shared.incrementSpinsCount()
                             } else {
                                 showAlert = true
                             }

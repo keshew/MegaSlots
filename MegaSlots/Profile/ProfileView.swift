@@ -2,6 +2,21 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject var profileModel =  ProfileViewModel()
+    @Environment(\.presentationMode) var presentationMode
+    let level = max(1,  UserDefaultsManager.shared.getSpinsCount() / 10)
+    let progressCount =  UserDefaultsManager.shared.getSpinsCount() % 10
+    
+    var string: String {
+        let firstLaunchDateKey = "firstLaunchDate"
+        let date = UserDefaults.standard.object(forKey: firstLaunchDateKey) as? Date ?? Date()
+        
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        
+        let formattedDate = formatter.string(from: date)
+        
+        return "Member since \(formattedDate)"
+    }
     
     var body: some View {
         ZStack {
@@ -19,7 +34,8 @@ struct ProfileView: View {
                                 VStack {
                                     HStack {
                                         Button(action: {
-                                            
+                                            NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                            presentationMode.wrappedValue.dismiss()
                                         }) {
                                             Image(.back)
                                                 .resizable()
@@ -34,7 +50,7 @@ struct ProfileView: View {
                                                 .frame(width: 40, height: 40)
                                             
                                             HStack(spacing: 5) {
-                                                Text("1020")
+                                                Text("\(profileModel.coins)")
                                                     .FontSemiBold(size: 20, color: Color(red: 253/255, green: 199/255, blue: 2/255))
                                                 
                                                 Text("coins")
@@ -87,13 +103,13 @@ struct ProfileView: View {
                                                             .font(.system(size: 30))
                                                     }
                                                     
-                                                    Button(action: {
-                                                        
-                                                    }) {
-                                                        Image(.pickImg)
-                                                            .resizable()
-                                                            .frame(width: 24, height: 24)
-                                                    }
+//                                                    Button(action: {
+//                                                        
+//                                                    }) {
+//                                                        Image(.pickImg)
+//                                                            .resizable()
+//                                                            .frame(width: 24, height: 24)
+//                                                    }
                                                 }
                                                 
                                                 Text("Player")
@@ -105,25 +121,27 @@ struct ProfileView: View {
                                                     Image(systemName: "star")
                                                         .foregroundStyle(Color(red: 252/255, green: 200/255, blue: 1/255))
                                                     
-                                                    Text("Level 1")
+                                                    Text("Level \(level)")
                                                         .FontSemiBold(size: 16)
                                                 }
                                                 
                                                 ZStack(alignment: .leading) {
                                                     Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 8)
+                                                        .fill(Color.white.opacity(0.2))
+                                                        .frame(width: 300, height: 8)
                                                         .cornerRadius(10)
                                                     
                                                     Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 8)
+                                                        .fill(LinearGradient(colors: [
+                                                            Color(red: 253/255, green: 199/255, blue: 2/255),
+                                                            Color(red: 255/255, green: 137/255, blue: 6/255)
+                                                        ], startPoint: .leading, endPoint: .trailing))
+                                                        .frame(width: CGFloat(progressCount) * 30, height: 8) 
                                                         .cornerRadius(10)
                                                 }
                                                 .padding(.horizontal, 30)
                                                 
-                                                Text("1/10 games to next level")
+                                                Text("\(progressCount)/10 games to next level")
                                                     .FontRegular(size: 12, color: .white.opacity(0.6))
                                             }
                                             .padding(.top, 10)
@@ -135,7 +153,7 @@ struct ProfileView: View {
                                                     .foregroundStyle(.white)
                                                     .font(.system(size: 20))
                                                 
-                                                Text("Member since September 18, 2025")
+                                                Text(string)
                                                     .FontRegular(size: 14)
                                             }
                                         }
@@ -159,7 +177,7 @@ struct ProfileView: View {
                                                         .resizable()
                                                         .frame(width: 38, height: 40)
                                                     
-                                                    Text("0")
+                                                    Text("\(UserDefaultsManager.shared.getTotalWinnings())")
                                                         .FontBold(size: 24, color: Color(red: 4/255, green: 223/255, blue: 114/255))
                                                     
                                                     Text("Total Winnings")
@@ -182,7 +200,7 @@ struct ProfileView: View {
                                                         .resizable()
                                                         .frame(width: 38, height: 40)
                                                     
-                                                    Text("0")
+                                                    Text("\(UserDefaultsManager.shared.getSpinsCount())")
                                                         .FontBold(size: 24, color: Color(red: 81/255, green: 162/255, blue: 255/255))
                                                     
                                                     Text("Games Played")
@@ -207,7 +225,7 @@ struct ProfileView: View {
                                                         .resizable()
                                                         .frame(width: 38, height: 40)
                                                     
-                                                    Text("0")
+                                                    Text("\(UserDefaultsManager.shared.getTotalWinnings() / 3)")
                                                         .FontBold(size: 24, color: Color(red: 194/255, green: 122/255, blue: 255/255))
                                                     
                                                     Text("Biggest Win")
@@ -230,7 +248,7 @@ struct ProfileView: View {
                                                         .resizable()
                                                         .frame(width: 38, height: 40)
                                                     
-                                                    Text("0")
+                                                    Text("\(UserDefaultsManager.shared.getSpinsCount())")
                                                         .FontBold(size: 24, color: Color(red: 255/255, green: 137/255, blue: 6/255))
                                                     
                                                     Text("Total Spins")
@@ -243,132 +261,6 @@ struct ProfileView: View {
                                     .padding(.trailing)
                             }
                         }
-                        
-                        Rectangle()
-                            .fill(.white.opacity(0.2))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(.gray, lineWidth: 2)
-                                    .overlay {
-                                        VStack(spacing: 20) {
-                                            HStack {
-                                                Image(.profileItm5)
-                                                    .resizable()
-                                                    .frame(width: 34, height: 36)
-                                                
-                                                Text("Slot Machine Stats")
-                                                    .FontBold(size: 18)
-                                                
-                                                Spacer()
-                                            }
-                                            
-                                            VStack {
-                                                HStack {
-                                                    Text("Fruit Slots")
-                                                        .FontRegular(size: 14)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Text("0 plays")
-                                                        .FontRegular(size: 14, color: .white.opacity(0.6))
-                                                }
-                                                
-                                                ZStack(alignment: .leading) {
-                                                    Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 6)
-                                                        .cornerRadius(10)
-                                                    
-                                                    Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 6)
-                                                        .cornerRadius(10)
-                                                }
-                                            }
-                                            
-                                            VStack {
-                                                HStack {
-                                                    Text("Space Slots")
-                                                        .FontRegular(size: 14)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Text("0 plays")
-                                                        .FontRegular(size: 14, color: .white.opacity(0.6))
-                                                }
-                                                
-                                                ZStack(alignment: .leading) {
-                                                    Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 6)
-                                                        .cornerRadius(10)
-                                                    
-                                                    Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 6)
-                                                        .cornerRadius(10)
-                                                }
-                                            }
-                                            
-                                            VStack {
-                                                HStack {
-                                                    Text("Mega Slots")
-                                                        .FontRegular(size: 14)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Text("0 plays")
-                                                        .FontRegular(size: 14, color: .white.opacity(0.6))
-                                                }
-                                                
-                                                ZStack(alignment: .leading) {
-                                                    Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 6)
-                                                        .cornerRadius(10)
-                                                    
-                                                    Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 6)
-                                                        .cornerRadius(10)
-                                                }
-                                            }
-                                            
-                                            VStack {
-                                                HStack {
-                                                    Text("Gold Slots")
-                                                        .FontRegular(size: 14)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Text("0 plays")
-                                                        .FontRegular(size: 14, color: .white.opacity(0.6))
-                                                }
-                                                
-                                                ZStack(alignment: .leading) {
-                                                    Rectangle()
-                                                        .fill(.white.opacity(0.2))
-                                                        .frame(height: 6)
-                                                        .cornerRadius(10)
-                                                    
-                                                    Rectangle()
-                                                        .fill(LinearGradient(colors: [Color(red: 253/255, green: 199/255, blue: 2/255),
-                                                                                      Color(red: 255/255, green: 137/255, blue: 6/255)], startPoint: .leading, endPoint: .trailing))
-                                                        .frame(width: 100, height: 6)
-                                                        .cornerRadius(10)
-                                                }
-                                            }
-                                        }
-                                        .padding(.vertical)
-                                        .padding(.horizontal)
-                                    }
-                            }
-                            .frame(height: 274)
-                            .cornerRadius(14)
-                            .padding(.horizontal)
                     }
                     .padding(.top)
                 }

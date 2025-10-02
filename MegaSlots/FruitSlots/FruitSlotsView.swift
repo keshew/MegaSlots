@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FruitSlotsView: View {
     @StateObject var fruitSlotsModel =  FruitSlotsViewModel()
+    @Environment(\.presentationMode) var presentationMode
     @State var showAlert = false
     var body: some View {
         ZStack {
@@ -15,18 +16,18 @@ struct FruitSlotsView: View {
                     .opacity(0.5)
             }
             .ignoresSafeArea()
-            .aspectRatio(contentMode: .fill)
             
             ScrollView(showsIndicators: false) {
                 VStack {
                     Image(.holder3)
                         .resizable()
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 180 : 110)
                         .overlay {
                             VStack {
                                 HStack {
                                     Button(action: {
-                                        
+                                        NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                        presentationMode.wrappedValue.dismiss()
                                     }) {
                                         Image(.fruitSlotsBack)
                                             .resizable()
@@ -49,7 +50,7 @@ struct FruitSlotsView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 40 : 20)
                                 
                                 HStack {
                                     Image(.fruitSlot1)
@@ -103,7 +104,7 @@ struct FruitSlotsView: View {
                                             }
                                         }
                                 }
-                                .frame(width: 316, height: 228)
+                                .frame(width: 316, height: UIScreen.main.bounds.width > 700 ? 480 : 228)
                                 .cornerRadius(14)
                         }
                         .frame(width: UIScreen.main.bounds.size.width - 30,  height: 269)
@@ -188,6 +189,9 @@ struct FruitSlotsView: View {
                             if fruitSlotsModel.balance != 0 {
                                 fruitSlotsModel.spin()
                                 fruitSlotsModel.balance -= fruitSlotsModel.bet
+                                UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
+                                UserDefaultsManager.shared.incrementFruitSlotSpins()
+                                UserDefaultsManager.shared.incrementSpinsCount()
                             } else {
                                 showAlert = true
                             }

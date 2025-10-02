@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject var settingsModel =  SettingsViewModel()
     @State var isOn = false
+    @Environment(\.presentationMode) var presentationMode
+    @State var showAlert = false
     
     var body: some View {
         ZStack {
@@ -20,7 +22,8 @@ struct SettingsView: View {
                                 VStack {
                                     HStack {
                                         Button(action: {
-                                            
+                                            NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                            presentationMode.wrappedValue.dismiss()
                                         }) {
                                             Image(.back)
                                                 .resizable()
@@ -35,7 +38,7 @@ struct SettingsView: View {
                                                 .frame(width: 40, height: 40)
                                             
                                             HStack(spacing: 5) {
-                                                Text("1020")
+                                                Text("\(settingsModel.coins)")
                                                     .FontSemiBold(size: 20, color: Color(red: 253/255, green: 199/255, blue: 2/255))
                                                 
                                                 Text("coins")
@@ -96,7 +99,7 @@ struct SettingsView: View {
                                                         .resizable()
                                                         .frame(width: 16, height: 16)
                                                     
-                                                    Text("1020")
+                                                    Text("\(settingsModel.coins)")
                                                         .FontSemiBold(size: 16)
                                                 }
                                                 
@@ -110,12 +113,12 @@ struct SettingsView: View {
                                                         .resizable()
                                                         .frame(width: 16, height: 16)
                                                     
-                                                    Text("1")
+                                                    Text("\(UserDefaultsManager.shared.getSpinsCount())")
                                                         .FontSemiBold(size: 16)
                                                 }
                                                 
                                                 HStack {
-                                                    Text("Current Balance:")
+                                                    Text("Total Winnings:")
                                                         .FontRegular(size: 16, color: .white.opacity(0.6))
                                                     
                                                     Spacer()
@@ -124,7 +127,7 @@ struct SettingsView: View {
                                                         .resizable()
                                                         .frame(width: 16, height: 16)
                                                     
-                                                    Text("0")
+                                                    Text("\(UserDefaultsManager.shared.getTotalWinnings())")
                                                         .FontSemiBold(size: 16)
                                                 }
                                             }
@@ -207,7 +210,10 @@ struct SettingsView: View {
                                             
                                             VStack(alignment: .leading, spacing: 10) {
                                                 Button(action: {
-                                                    
+                                                    UserDefaultsManager.shared.resetAllButCoins()
+                                                    showAlert = true
+                                                    NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                                    settingsModel.coins =  UserDefaultsManager.shared.getCoins()
                                                 }) {
                                                     Rectangle()
                                                         .fill(Color(red: 232/255, green: 0/255, blue: 12/255))
@@ -222,6 +228,13 @@ struct SettingsView: View {
                                                         }
                                                         .frame(height: 36)
                                                         .cornerRadius(8)
+                                                }
+                                                .alert(isPresented: $showAlert) {
+                                                    Alert(
+                                                        title: Text("Done"),
+                                                        message: Text("All progress are reseted."),
+                                                        dismissButton: .default(Text("Ok"))
+                                                    )
                                                 }
                                                 
                                                 Text("This will reset all your stats and give you 1,000 free coins")

@@ -3,7 +3,7 @@ import SwiftUI
 class MegSlotsViewModel: ObservableObject {
     let contact = MegSlotsModel()
     @Published var slots: [[String]] = []
-    @Published var balance = 1000
+    @Published var balance =  UserDefaultsManager.shared.getCoins()
     @Published var bet = 25
     let allFruits = ["megaSlot1", "megaSlot2","megaSlot3", "megaSlot4","megaSlot5", "megaSlot6"]
     @Published var winningPositions: [(row: Int, col: Int)] = []
@@ -94,6 +94,8 @@ class MegSlotsViewModel: ObservableObject {
             balance += (totalWin + bet)
             win = (totalWin + bet)
             isWin = true
+            UserDefaultsManager.shared.addCoins(win)
+            UserDefaultsManager.shared.addWinnings(win)
         }
     }
 }

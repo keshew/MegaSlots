@@ -3,7 +3,7 @@ import SwiftUI
 class GoldSlotsViewModel: ObservableObject {
     let contact = GoldSlotsModel()
     @Published var slots: [[String]] = []
-    @Published var balance = 1000
+    @Published var balance =  UserDefaultsManager.shared.getCoins()
     @Published var bet = 15
     let allFruits = ["goldSlots1", "goldSlots2","goldSlots3", "goldSlots4","goldSlots5", "goldSlots6"]
     @Published var winningPositions: [(row: Int, col: Int)] = []
@@ -94,6 +94,8 @@ class GoldSlotsViewModel: ObservableObject {
             balance += (totalWin + bet)
             win = (totalWin + bet)
             isWin = true
+            UserDefaultsManager.shared.addCoins(win)
+            UserDefaultsManager.shared.addWinnings(win)
         }
     }
 }

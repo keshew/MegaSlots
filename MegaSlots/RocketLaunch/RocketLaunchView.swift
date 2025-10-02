@@ -9,7 +9,8 @@ struct RocketLaunchView: View {
     @State private var timer: Timer? = nil
     let gird = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
     @State private var multiplierHistory: [CGFloat] = UserDefaults.standard.array(forKey: "multiplierHistory") as? [CGFloat] ?? []
-
+    @Environment(\.presentationMode) var presentationMode
+    
     var body: some View {
         ZStack {
             ZStack {
@@ -22,18 +23,18 @@ struct RocketLaunchView: View {
                 .opacity(0.5)
             }
             .ignoresSafeArea()
-            .aspectRatio(contentMode: .fill)
             
             ScrollView(showsIndicators: false) {
                 VStack {
                     Image(.holder2)
                         .resizable()
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ? 180 : 110)
                         .overlay {
                             VStack {
                                 HStack {
                                     Button(action: {
-                                        
+                                        NotificationCenter.default.post(name: Notification.Name("UserResourcesUpdated"), object: nil)
+                                        presentationMode.wrappedValue.dismiss()
                                     }) {
                                         Image(.back)
                                             .resizable()
@@ -56,7 +57,7 @@ struct RocketLaunchView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 40 : 20)
                                 
                                 HStack {
                                     Image(.rocket)
@@ -142,7 +143,7 @@ struct RocketLaunchView: View {
                                 .offset(x: 8, y: -2)
                             }
                         }
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 269)
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: UIScreen.main.bounds.width > 700 ?  480 : 269)
                     
                     Rectangle()
                         .fill(Color(red: 157/255, green: 16/255, blue: 159/255).opacity(0.4))
@@ -302,6 +303,7 @@ struct RocketLaunchView: View {
                                                 finalizeGame()
                                             } else {
                                                 launchAction()
+                                                UserDefaultsManager.shared.incrementSpinsCount()
                                             }
                                         }) {
                                             Rectangle()
@@ -396,6 +398,7 @@ struct RocketLaunchView: View {
 
         isPlaying = true
         fruitSlotsModel.balance -= fruitSlotsModel.bet
+        UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
         progress = 0.0
         displayedMultiplier = 1.0
         fruitSlotsModel.multiplierTextColor = Color(red: 141/255, green: 1/255, blue: 198/255)
@@ -423,6 +426,8 @@ struct RocketLaunchView: View {
         fruitSlotsModel.multiplierTextColor = .green
         let winAmount = Int(CGFloat(fruitSlotsModel.bet) * displayedMultiplier)
         fruitSlotsModel.balance += winAmount
+        UserDefaultsManager.shared.addCoins(winAmount)
+        UserDefaultsManager.shared.addWinnings(winAmount)
         isPlaying = false
         
         multiplierHistory.append(displayedMultiplier)
