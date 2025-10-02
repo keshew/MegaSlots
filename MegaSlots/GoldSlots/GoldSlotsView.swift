@@ -22,6 +22,7 @@ struct GoldSlotsView: View {
                 VStack {
                     Image(.holderGold)
                         .resizable()
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
                         .overlay {
                             VStack {
                                 HStack {
@@ -65,7 +66,6 @@ struct GoldSlotsView: View {
                                 }
                             }
                         }
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
                     
                     Rectangle()
                         .fill(Color(red: 225/255, green: 160/255, blue: 18/255).opacity(0.1))

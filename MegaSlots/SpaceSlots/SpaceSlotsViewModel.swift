@@ -4,7 +4,7 @@ class SpaceSlotsViewModel: ObservableObject {
     let contact = SpaceSlotsModel()
     @Published var slots: [[String]] = []
     @Published var balance = 1000
-    @Published var bet = 50
+    @Published var bet = 15
     let allFruits = ["spaceSlot1", "spaceSlot2","spaceSlot3", "spaceSlot4","spaceSlot5", "spaceSlot6"]
     @Published var winningPositions: [(row: Int, col: Int)] = []
     @Published var isSpinning = false

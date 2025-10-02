@@ -20,57 +20,52 @@ struct SpaceSlotsView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack {
-                    Rectangle()
-                        .fill(Color(red: 144/255, green: 78/255, blue: 189/255).opacity(0.4))
+                    Image(.holder2)
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
                         .overlay {
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color(red: 144/255, green: 78/255, blue: 189/255), lineWidth: 6)
-                                .overlay {
-                                    VStack {
-                                        HStack {
-                                            Button(action: {
-                                                
-                                            }) {
-                                                Image(.back)
-                                                    .resizable()
-                                                    .frame(width: 39, height: 39)
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            HStack {
-                                                Image(.coin)
-                                                    .resizable()
-                                                    .frame(width: 40, height: 40)
-                                                
-                                                HStack(spacing: 5) {
-                                                    Text("\(fruitSlotsModel.balance)")
-                                                        .FontSemiBold(size: 20, color: Color(red: 253/255, green: 199/255, blue: 2/255))
-                                                    
-                                                    Text("coins")
-                                                        .FontRegular(size: 16, color: Color(red: 255/255, green: 240/255, blue: 133/255))
-                                                }
-                                            }
-                                        }
-                                        .padding(.horizontal)
+                            VStack {
+                                HStack {
+                                    Button(action: {
                                         
-                                        HStack {
-                                            Image(.spaceSlot3)
-                                                .resizable()
-                                                .frame(width: 35, height: 40)
+                                    }) {
+                                        Image(.back)
+                                            .resizable()
+                                            .frame(width: 35, height: 35)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    HStack {
+                                        Image(.coin)
+                                            .resizable()
+                                            .frame(width: 35, height: 35)
+                                        
+                                        HStack(spacing: 5) {
+                                            Text("\(fruitSlotsModel.balance)")
+                                                .FontSemiBold(size: 20, color: Color(red: 253/255, green: 199/255, blue: 2/255))
                                             
-                                            Text("Space Slots")
-                                                .FontBold(size: 30)
-                                            
-                                            Image(.spaceSlot3)
-                                                .resizable()
-                                                .frame(width: 35, height: 40)
+                                            Text("coins")
+                                                .FontRegular(size: 16, color: Color(red: 255/255, green: 240/255, blue: 133/255))
                                         }
                                     }
                                 }
+                                .padding(.horizontal)
+                                
+                                HStack {
+                                    Image(.spaceSlot3)
+                                        .resizable()
+                                        .frame(width: 25, height: 30)
+                                    
+                                    Text("Space Slots")
+                                        .FontBold(size: 24)
+                                    
+                                    Image(.spaceSlot3)
+                                        .resizable()
+                                        .frame(width: 25, height: 30)
+                                }
+                            }
                         }
-                        .frame(width: UIScreen.main.bounds.size.width - 30,  height: 110)
-                        .cornerRadius(14)
                     
                     Image(.spaceDesc)
                         .resizable()

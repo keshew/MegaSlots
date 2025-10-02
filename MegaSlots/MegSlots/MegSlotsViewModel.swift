@@ -4,7 +4,7 @@ class MegSlotsViewModel: ObservableObject {
     let contact = MegSlotsModel()
     @Published var slots: [[String]] = []
     @Published var balance = 1000
-    @Published var bet = 50
+    @Published var bet = 25
     let allFruits = ["megaSlot1", "megaSlot2","megaSlot3", "megaSlot4","megaSlot5", "megaSlot6"]
     @Published var winningPositions: [(row: Int, col: Int)] = []
     @Published var isSpinning = false
