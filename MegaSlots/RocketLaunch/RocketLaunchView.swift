@@ -13,6 +13,7 @@ struct RocketLaunchView: View {
     @State private var shakeOffset: CGFloat = 0
     @State private var isFalling: Bool = false
     @State private var isShaking = false
+    @State private var rotationAngle: Double = 0
     
     var body: some View {
         ZStack {
@@ -91,12 +92,13 @@ struct RocketLaunchView: View {
                                             .overlay(
                                                 VStack {
                                                     Image(.rocket)
-                                                        .resizable()
-                                                        .frame(width: 60, height: 70)
-                                                        .padding(.top)
-                                                        .offset(x: isShaking ? shakeOffset : 0, y: isFalling ? 250 : 0)
-                                                        .animation(Animation.linear(duration: 0.1).repeat(while: isShaking), value: isShaking)
-
+                                                       .resizable()
+                                                       .frame(width: 60, height: 70)
+                                                       .padding(.top)
+                                                       .rotationEffect(.degrees(rotationAngle))
+                                                       .offset(x: isShaking ? shakeOffset : 0, y: isFalling ? 250 : 0)
+                                                       .animation(.linear(duration: 0.1).repeat(while: isShaking), value: isShaking)
+                                                    
                                                     Text("X \(String(format: "%.2f", displayedMultiplier))")
                                                         .FontBold(size: 35, color: fruitSlotsModel.multiplierTextColor)
                                                         .outlineText(color: .white, width: 1)
@@ -404,7 +406,7 @@ struct RocketLaunchView: View {
             showAlert = true
             return
         }
-
+        rotationAngle = 0
         isPlaying = true
         isFalling = false
         fruitSlotsModel.balance -= fruitSlotsModel.bet
@@ -426,10 +428,12 @@ struct RocketLaunchView: View {
                 displayedMultiplier = 1.0 + progress * 3
                 
                 if !won && progress > 0.05 && Bool.random() {
+                    rotationAngle = 120
                     fruitSlotsModel.multiplierTextColor = .red
                     isPlaying = false
                     withAnimation(.easeIn(duration: 0.8)) {
                         isFalling = true
+           
                     }
                     t.invalidate()
                     timer = nil
