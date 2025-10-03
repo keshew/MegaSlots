@@ -12,6 +12,7 @@ class SpaceSlotsViewModel: ObservableObject {
     @Published var isWin = false
     @Published var win = 0
     var spinningTimer: Timer?
+    @ObservedObject private var soundManager = SoundManager.shared
     
     init() {
         resetSlots()
@@ -26,6 +27,7 @@ class SpaceSlotsViewModel: ObservableObject {
     }
     
     func spin() {
+        soundManager.playSlot4()
         isSpinning = true
         spinningTimer?.invalidate()
 
@@ -39,6 +41,7 @@ class SpaceSlotsViewModel: ObservableObject {
             self.spinningTimer?.invalidate()
             self.checkWin()
             self.isSpinning = false
+            self.soundManager.stopSlot4()
         }
     }
 

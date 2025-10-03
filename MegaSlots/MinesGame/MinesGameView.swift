@@ -9,6 +9,7 @@ struct MinesGameView: View {
     @State private var timer: Timer? = nil
     let grid5 = Array(repeating: GridItem(.flexible(), spacing: 0), count: 5)
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject private var soundManager = SoundManager.shared
     
     var body: some View {
         ZStack {
@@ -103,6 +104,7 @@ struct MinesGameView: View {
                                                             .onTapGesture {
                                                                 if isPlaying && !cell.isOpened {
                                                                     openCell(cell)
+                                                                    soundManager.playTapMusic()
                                                                 }
                                                             }
                                                     }
@@ -311,7 +313,6 @@ struct MinesGameView: View {
                                                 }
                                                 .cornerRadius(6)
                                         }
-                                        .disabled(fruitSlotsModel.bet > fruitSlotsModel.balance)
                                         .alert(isPresented: $showAlert) {
                                             Alert(
                                                 title: Text("Not enough coins"),

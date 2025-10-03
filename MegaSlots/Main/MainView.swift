@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject var mainModel =  MainViewModel()
+    @ObservedObject private var soundManager = SoundManager.shared
     
     var body: some View {
         ZStack {
@@ -19,7 +20,7 @@ struct MainView: View {
                                             ZStack {
                                                 Image(.holder1)
                                                     .resizable()
-                                                    .frame(height: UIScreen.main.bounds.width > 700 ? 220 : 140)
+                                                    .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                                                 
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 10) {
@@ -78,7 +79,7 @@ struct MainView: View {
                                 
                         }
                         .aspectRatio(contentMode: .fill)
-                        .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 140)
+                        .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                         .clipped()
                         .cornerRadius(UIScreen.main.bounds.width > 700 ? 24 : 14)
                         .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
@@ -162,7 +163,7 @@ struct MainView: View {
                     }) {
                         Image("item3r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                     
@@ -171,7 +172,7 @@ struct MainView: View {
                     }) {
                         Image("item4r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                     
@@ -180,7 +181,7 @@ struct MainView: View {
                     }) {
                         Image("item5r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                     
@@ -189,7 +190,7 @@ struct MainView: View {
                     }) {
                         Image("item6r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                     
@@ -198,7 +199,7 @@ struct MainView: View {
                     }) {
                         Image("item7r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                     
@@ -207,7 +208,7 @@ struct MainView: View {
                     }) {
                         Image("item8r")
                             .resizable()
-                            .frame(height: UIScreen.main.bounds.width > 700 ?  220 : 115)
+                            .frame(height: UIScreen.main.bounds.width > 800 ? 220 : UIScreen.main.bounds.width > 700 ? 140 : 115)
                             .padding(.horizontal, UIScreen.main.bounds.width > 700 ? 140 : 15)
                     }
                 }

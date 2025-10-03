@@ -11,6 +11,8 @@ class FruitSlotsViewModel: ObservableObject {
     @Published var isStopSpininng = false
     @Published var isWin = false
     @Published var win = 0
+    @ObservedObject private var soundManager = SoundManager.shared
+    
     var spinningTimer: Timer?
     
     init() {
@@ -26,6 +28,7 @@ class FruitSlotsViewModel: ObservableObject {
     }
     
     func spin() {
+        soundManager.playSlot1()
         isSpinning = true
         spinningTimer?.invalidate()
 
@@ -39,6 +42,7 @@ class FruitSlotsViewModel: ObservableObject {
             self.spinningTimer?.invalidate()
             self.checkWin()
             self.isSpinning = false
+            self.soundManager.stopSlot1()
         }
     }
 

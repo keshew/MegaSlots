@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject var settingsModel =  SettingsViewModel()
-    @State var isOn = false
+ 
     @Environment(\.presentationMode) var presentationMode
     @State var showAlert = false
     
@@ -176,7 +176,7 @@ struct SettingsView: View {
                                                 
                                                 Spacer()
                                                 
-                                                Toggle("", isOn: $isOn)
+                                                Toggle("", isOn: $settingsModel.isOn)
                                                     .toggleStyle(CustomToggleStyle())
                                             }
                                             .padding(.bottom, 10)

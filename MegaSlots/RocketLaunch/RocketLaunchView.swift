@@ -14,6 +14,7 @@ struct RocketLaunchView: View {
     @State private var isFalling: Bool = false
     @State private var isShaking = false
     @State private var rotationAngle: Double = 0
+    @ObservedObject private var soundManager = SoundManager.shared
     
     var body: some View {
         ZStack {
@@ -312,6 +313,7 @@ struct RocketLaunchView: View {
                                                 isShaking = false
                                                 shakeOffset = 0
                                                 isFalling = false
+                                                soundManager.stopPlaneMusic()
                                             } else {
                                                 launchAction()
                                                 UserDefaultsManager.shared.incrementSpinsCount()
@@ -406,6 +408,7 @@ struct RocketLaunchView: View {
             showAlert = true
             return
         }
+        soundManager.playPlaneMusic()
         rotationAngle = 0
         isPlaying = true
         isFalling = false
@@ -433,25 +436,26 @@ struct RocketLaunchView: View {
                     isPlaying = false
                     withAnimation(.easeIn(duration: 0.8)) {
                         isFalling = true
-           
+                        soundManager.stopPlaneMusic()
                     }
                     t.invalidate()
                     timer = nil
-                    
+              
                     withAnimation(.easeIn(duration: 0.8)) {
                         shakeOffset = 0
                     }
-
+        
                 }
             } else {
                 t.invalidate()
                 timer = nil
                 finalizeGame()
-
+   
                 withAnimation {
                     isShaking = false
                     shakeOffset = 0
                     isFalling = false
+                    soundManager.stopPlaneMusic()
                 }
             }
         }

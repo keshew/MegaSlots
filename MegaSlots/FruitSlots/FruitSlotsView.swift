@@ -3,6 +3,7 @@ import SwiftUI
 struct FruitSlotsView: View {
     @StateObject var fruitSlotsModel =  FruitSlotsViewModel()
     @Environment(\.presentationMode) var presentationMode
+
     @State var showAlert = false
     var body: some View {
         ZStack {
