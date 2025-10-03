@@ -10,6 +10,9 @@ struct RocketLaunchView: View {
     let gird = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
     @State private var multiplierHistory: [CGFloat] = UserDefaults.standard.array(forKey: "multiplierHistory") as? [CGFloat] ?? []
     @Environment(\.presentationMode) var presentationMode
+    @State private var shakeOffset: CGFloat = 0
+    @State private var isFalling: Bool = false
+    @State private var isShaking = false
     
     var body: some View {
         ZStack {
@@ -91,6 +94,9 @@ struct RocketLaunchView: View {
                                                         .resizable()
                                                         .frame(width: 60, height: 70)
                                                         .padding(.top)
+                                                        .offset(x: isShaking ? shakeOffset : 0, y: isFalling ? 250 : 0)
+                                                        .animation(Animation.linear(duration: 0.1).repeat(while: isShaking), value: isShaking)
+
                                                     Text("X \(String(format: "%.2f", displayedMultiplier))")
                                                         .FontBold(size: 35, color: fruitSlotsModel.multiplierTextColor)
                                                         .outlineText(color: .white, width: 1)
@@ -301,6 +307,9 @@ struct RocketLaunchView: View {
                                                 timer?.invalidate()
                                                 timer = nil
                                                 finalizeGame()
+                                                isShaking = false
+                                                shakeOffset = 0
+                                                isFalling = false
                                             } else {
                                                 launchAction()
                                                 UserDefaultsManager.shared.incrementSpinsCount()
@@ -397,6 +406,7 @@ struct RocketLaunchView: View {
         }
 
         isPlaying = true
+        isFalling = false
         fruitSlotsModel.balance -= fruitSlotsModel.bet
         UserDefaultsManager.shared.subtractCoins(fruitSlotsModel.bet)
         progress = 0.0
@@ -404,20 +414,41 @@ struct RocketLaunchView: View {
         fruitSlotsModel.multiplierTextColor = Color(red: 141/255, green: 1/255, blue: 198/255)
 
         let won = Bool.random()
+        
+        withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+            isShaking = true
+            shakeOffset = 10
+        }
+
         timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
             if progress < 0.4 {
                 progress += 0.01
                 displayedMultiplier = 1.0 + progress * 3
+                
                 if !won && progress > 0.05 && Bool.random() {
                     fruitSlotsModel.multiplierTextColor = .red
                     isPlaying = false
+                    withAnimation(.easeIn(duration: 0.8)) {
+                        isFalling = true
+                    }
                     t.invalidate()
                     timer = nil
+                    
+                    withAnimation(.easeIn(duration: 0.8)) {
+                        shakeOffset = 0
+                    }
+
                 }
             } else {
                 t.invalidate()
                 timer = nil
                 finalizeGame()
+
+                withAnimation {
+                    isShaking = false
+                    shakeOffset = 0
+                    isFalling = false
+                }
             }
         }
     }
@@ -456,3 +487,14 @@ struct RocketLaunchView: View {
     RocketLaunchView()
 }
 
+import SwiftUI
+
+extension Animation {
+    func `repeat`(while condition: Bool, autoreverses: Bool = true) -> Animation {
+        if condition {
+            return self.repeatForever(autoreverses: autoreverses)
+        } else {
+            return self
+        }
+    }
+}
