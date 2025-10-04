@@ -214,6 +214,9 @@ struct MainView: View {
                 }
             }
         }
+        .onAppear() {
+            soundManager.playBackgroundMusic()
+        }
         .fullScreenCover(isPresented: $mainModel.achiv) {
             AchievmentsView()
         }

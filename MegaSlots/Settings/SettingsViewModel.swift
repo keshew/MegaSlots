@@ -6,8 +6,10 @@ class SettingsViewModel: ObservableObject {
         didSet {
             UserDefaults.standard.set(isOn, forKey: "isSoundOn")
             if isOn {
+                SoundManager.shared.isMusicEnabled = UserDefaults.standard.bool(forKey: "isSoundOn")
                 SoundManager.shared.playBackgroundMusic()
             } else {
+                SoundManager.shared.isMusicEnabled = UserDefaults.standard.bool(forKey: "isSoundOn")
                 SoundManager.shared.stopAllSounds()
             }
         }
